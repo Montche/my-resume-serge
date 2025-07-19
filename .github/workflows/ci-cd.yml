@@ -12,7 +12,7 @@ env:
   CONTAINER_NAME: nginx
   TASK_DEFINITION: nginx-task
   AWS_CREDS: ${{ secrets.aws_role}}
-  AWS_REGION: ${{ secret.aws_region}}
+  AWS_REGION: ${{ secrets.aws_region}}
 
 jobs:
   build-and-deploy:
