@@ -65,12 +65,12 @@ jobs:
         
         # Update the image in the task definition
         jq --arg IMAGE_URI "${{ steps.build-and-push.outputs.image }}" \
-          '.containerDefinitions[0].image = $IMAGE_URI' \
-          task-definition.json > updated-task-definition.json
+          '.containerDefinitions[0].image = $IMAGE_URI | 
+           del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy, .deregisteredAt)' \
+          task-definition.json > register-task-definition.json
 
     - name: Register new task definition
       run: |
-        jq 'del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy, .deregisteredAt)' updated-task-definition.json > register-task-definition.json
         aws ecs register-task-definition --cli-input-json file://updated-task-definition.json
         
         # Get the new revision number
