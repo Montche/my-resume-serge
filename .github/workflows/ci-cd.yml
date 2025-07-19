@@ -84,9 +84,3 @@ jobs:
           --service ${{ env.ECS_SERVICE }} \
           --task-definition ${{ env.NEW_TASK_DEFINITION }} \
           --force-new-deployment
-
-    - name: Wait for service stability
-      run: |
-        aws ecs wait services-stable \
-          --cluster ${{ env.ECS_CLUSTER }} \
-          --services ${{ env.ECS_SERVICE }}
