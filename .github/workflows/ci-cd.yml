@@ -11,8 +11,8 @@ env:
   ECS_SERVICE: nginx-service
   CONTAINER_NAME: nginx
   TASK_DEFINITION: nginx-task
-  AWS_CREDS: ${{ secrets.aws_role}}
-  AWS_REGION: ${{ secrets.aws_region}}
+  AWS_CREDS: ${{ secrets.AWS_ROLE}}
+  AWS_REGION: ${{ secrets.AWS_REGION}}
 
 jobs:
   build-and-deploy:
