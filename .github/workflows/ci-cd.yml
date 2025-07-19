@@ -64,7 +64,7 @@ jobs:
         sudo apt-get install -y jq
         
         # Update the image in the task definition
-        jq --arg IMAGE_URI "${{ steps.build-and-push.outputs.image }}" \
+        jq --arg IMAGE_URI "${{ env.image }}" \
           '.containerDefinitions[0].image = $IMAGE_URI | 
            del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy, .deregisteredAt)' \
           task-definition.json > register-task-definition.json
