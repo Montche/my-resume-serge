@@ -71,7 +71,7 @@ jobs:
 
     - name: Register new task definition
       run: |
-        aws ecs register-task-definition --cli-input-json file://updated-task-definition.json
+        aws ecs register-task-definition --cli-input-json file://register-task-definition.json
         
         # Get the new revision number
         echo "NEW_TASK_DEFINITION=$(aws ecs describe-task-definition --task-definition ${{ env.TASK_DEFINITION }} --query 'taskDefinition.taskDefinitionArn' --output text)" >> $GITHUB_ENV
