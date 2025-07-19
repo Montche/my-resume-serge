@@ -1,86 +1,27 @@
-name: Build and Deploy to ECS via ECR
+name: build push and deploy image
 
 on:
   push:
-    branches: [ main ]
-permissions:
-  id-token: write
-  contents: read
+    branches: [main]
+  pull_request:
+    branches: [main]
+
 env:
-  
-  ECR_REPOSITORY: dev
-  ECS_CLUSTER: nginx-cluster
-  ECS_SERVICE: nginx-service
-  CONTAINER_NAME: nginx
-  TASK_DEFINITION: nginx-task
-  AWS_CREDS: ${{ secrets.AWS_ROLE}}
-  AWS_REGION: ${{ secrets.AWS_REGION}}
+  AWS_REGION: us-east-1
+  AWS_ROLE: ${{ secrets.AWS_ACTION_ROLE }}
+
 
 jobs:
-  build-and-deploy:
-    runs-on: ubuntu-latest
-    
+  build:
+    runs-on: ubuntu-latest  # guthub runner
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        role-to-assume: ${{secrets.AWS_ROLE}}
-        aws-region: ${{ env.AWS_REGION }}
-
-    # Login to Amazon ECR
-    - name: Login to Amazon ECR
-      id: login-ecr
-      uses: aws-actions/amazon-ecr-login@v1
-
-    # Build and push to ECR
-    - name: Build, tag, and push image to Amazon ECR
-      id: build-and-push
-      env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY: ${{ env.ECR_REPOSITORY }}
-        IMAGE_TAG: ${{ github.sha }}
-      run: |
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-        echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
-
-    # Get the ECR image URI
-    - name: Set image URI
-      id: set-image
-      run: |
-        echo "IMAGE_URI=${{ steps.build-and-push.outputs.image }}" >> $GITHUB_ENV
-
-    # Deployment steps
-    - name: Download current task definition
-      run: |
-        aws ecs describe-task-definition --task-definition ${{ env.TASK_DEFINITION }} \
-          --query taskDefinition > task-definition.json
-
-    - name: Update task definition with new ECR image
-      run: |
-        # Install jq if not already available
-        sudo apt-get install -y jq
-        
-        # Update the image in the task definition
-        jq --arg IMAGE_URI "${{ steps.build-and-push.outputs.image}}" \
-          '.containerDefinitions[0].image = $IMAGE_URI | 
-           del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy, .deregisteredAt)' \
-          task-definition.json > register-task-definition.json
-
-    - name: Register new task definition
-      run: |
-        aws ecs register-task-definition --cli-input-json file://register-task-definition.json
-        
-        # Get the new revision number
-        echo "NEW_TASK_DEFINITION=$(aws ecs describe-task-definition --task-definition ${{ env.TASK_DEFINITION }} --query 'taskDefinition.taskDefinitionArn' --output text)" >> $GITHUB_ENV
-
-    - name: Update ECS service
-      run: |
-        aws ecs update-service \
-          --cluster ${{ env.ECS_CLUSTER }} \
-          --service ${{ env.ECS_SERVICE }} \
-          --task-definition ${{ env.NEW_TASK_DEFINITION }} \
-          --force-new-deployment
+      - name: clone repo
+        uses: actions/checkout@v3
+      - name: Aws creds config 
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_ROLE }}     # OIDC
+          aws-region: ${{ env.AWS_REGION}}
+      - name: Loging to ecr 
+        uses: aws-actions/amazon-ecr-login@v1
+      
