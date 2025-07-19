@@ -70,6 +70,7 @@ jobs:
 
     - name: Register new task definition
       run: |
+        jq 'del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy, .deregisteredAt)' updated-task-definition.json > register-task-definition.json
         aws ecs register-task-definition --cli-input-json file://updated-task-definition.json
         
         # Get the new revision number
