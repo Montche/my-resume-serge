@@ -1,9 +1,9 @@
-FROM cgr.dev/chainguard/python:latest
+FROM python:3.12-slim
 
 WORKDIR /app
-RUN [ "/sbin/apk", "add", "--no-cache", "bash" ]
+
 COPY . .
-ENV PATH="/opt/venv/bin:$PATH"
+
 RUN pip install --no-cache-dir -r requirements.txt
 
 EXPOSE 80
