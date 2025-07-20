@@ -69,14 +69,9 @@ jobs:
 
       - name: Update task definition with new ECR image
         run: |
-          # Install jq if not already available
-          sudo apt-get install -y jq
-        
-           # Update the image in the task definition
-          jq --arg IMAGE_URI "${{ steps.build-and-push.outputs.image}}" \
-          '.containerDefinitions[0].image = $IMAGE_URI | 
-           del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy, .deregisteredAt)' \
-          task-definition.json > register-task-definition.json
+           sudo apt-get install -y jq
+           jq --arg IMAGE_URI "${{ steps.build-and-push.outputs.image}}" '.containerDefinitions[0].image = $IMAGE_URI | 
+           del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy, .deregisteredAt)' task-definition.json > register-task-definition.json
 
       - name: Register new task definition
         run: |
