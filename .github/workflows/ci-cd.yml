@@ -15,7 +15,11 @@ env:
   AWS_ROLE: ${{ secrets.AWS_ACTION_ROLE }}
   ECR_REPO_NAME: dev
   IMAGE_TAG: ${{ github.run_number}}
-
+  TASK_DEFINITION: nginx-task
+  ECR_REPOSITORY: dev
+  ECS_CLUSTER: nginx-cluster
+  ECS_SERVICE: nginx-service
+  CONTAINER_NAME: nginx
 
 jobs:
   Build:
