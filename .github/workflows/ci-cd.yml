@@ -8,7 +8,8 @@ on:
 
 permissions:
   id-token: write 
-  contents: read 
+  contents: read
+  pull-requests: write 
 
 env:
   AWS_REGION: us-east-1
@@ -91,23 +92,28 @@ jobs:
                 **Advisory:** ${v.PrimaryURL || 'N/A'}
               `).join('\n');
 
-              const fsVulns = fsReport.Results?.flatMap(r => r.Vulnerabilities || []);
-              const imageVulns = imageReport.Results?.flatMap(r => r.Vulnerabilities || []);
 
-              let comment = '## 🔍 Trivy Security Report\n';
-              if (fsVulns.length > 0) comment += `### 📂 Filesystem Vulnerabilities\n${formatVulns(fsVulns)}\n`;
-              if (imageVulns.length > 0) comment += `### 🐳 Docker Image Vulnerabilities\n${formatVulns(imageVulns)}\n`;
-              if (fsVulns.length + imageVulns.length === 0) comment += '✅ No critical/high vulnerabilities found.';
 
-              await github.rest.issues.createComment({
-                issue_number: context.issue.number,
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                body: comment
-              });
-            } catch (error) {
-              core.error('Failed to process Trivy results: ' + error.message);
-            }
+      - name: Post Fix Suggestions on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            // Use require() to import Node.js modules
+            const fs = require('fs');
+            
+            try {
+              // Read file synchronously (use async methods if preferred)
+              const fsReport = JSON.parse(fs.readFileSync('trivy-fs-results.json', 'utf8'));
+              const imageReport = JSON.parse(fs.readFileSync('trivy-image-results.json', 'utf8'));
+              
+              const formatVulns = (vulns) => vulns.map(v => `
+                **Package:** ${v.PkgName} (${v.InstalledVersion})  
+                **CVE:** ${v.VulnerabilityID} (${v.Severity})  
+                **Fix Version:** ${v.FixedVersion || 'None'}  
+                **Advisory:** ${v.PrimaryURL || 'N/A'}
+              `).join('\n');
+
   Deploy:
     runs-on: ubuntu-latest
     needs: Build  # Depends on Build job
