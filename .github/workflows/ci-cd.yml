@@ -69,8 +69,7 @@ jobs:
 
       - name: Update task definition with new ECR image
         run: |
-           sudo apt-get install -y jq
-           jq --arg IMAGE_URI "${{ steps.ecr-login.outputs.registry }}/${{ env.ECR_REPO_NAME}}:${{env.IMAGE_TAG}}" '.containerDefinitions[0].image = $IMAGE_URI | 
+           jq --arg IMAGE_URI "${{ needs.ecr-login.outputs.registry }}/${{ env.ECR_REPO_NAME}}:${{env.IMAGE_TAG}}" '.containerDefinitions[0].image = $IMAGE_URI | 
            del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy, .deregisteredAt)' task-definition.json > register-task-definition.json
 
       - name: Register new task definition
