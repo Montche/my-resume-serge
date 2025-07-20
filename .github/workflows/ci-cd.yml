@@ -70,14 +70,12 @@ jobs:
       - name: Update task definition with new ECR image
         run: |
            sudo apt-get install -y jq
-           jq --arg IMAGE_URI "${{ steps.build-and-push.outputs.image}}" '.containerDefinitions[0].image = $IMAGE_URI | 
+           jq --arg IMAGE_URI "${{ steps.ecr-login.outputs.registry }}/${{ env.ECR_REPO_NAME}}:${{env.IMAGE_TAG}}" '.containerDefinitions[0].image = $IMAGE_URI | 
            del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy, .deregisteredAt)' task-definition.json > register-task-definition.json
 
       - name: Register new task definition
         run: |
           aws ecs register-task-definition --cli-input-json file://register-task-definition.json
-        
-          # Get the new revision number
           echo "NEW_TASK_DEFINITION=$(aws ecs describe-task-definition --task-definition ${{ env.TASK_DEFINITION }} --query 'taskDefinition.taskDefinitionArn' --output text)" >> $GITHUB_ENV
 
       - name: Update ECS service
