@@ -1,9 +1,9 @@
-FROM cgr.dev/chainguard/python
+FROM cgr.dev/chainguard/python:latest
 
 WORKDIR /app
 
 COPY . .
-ENV PATH="/app/venv/bin":$PATH
+ENV PATH="/opt/venv/bin:$PATH"
 RUN pip install --no-cache-dir -r requirements.txt
 
 EXPOSE 80
