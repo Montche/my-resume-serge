@@ -8,7 +8,8 @@ on:
 
 permissions:
   id-token: write 
-  contents: read 
+  contents: read
+  pull-requests: write 
 
 env:
   AWS_REGION: us-east-1
@@ -71,7 +72,7 @@ jobs:
         run: |
           IMAGE_URI="${{ steps.ecr-login.outputs.registry }}/${{ env.ECR_REPO_NAME}}:${{ env.IMAGE_TAG }}"
           echo "image-uri=$IMAGE_URI" >> $GITHUB_OUTPUT
-          
+
       - name: Post Fix Suggestions on PR
         if: github.event_name == 'pull_request'
         uses: actions/github-script@v6
