@@ -20,9 +20,9 @@ jobs:
         runs-on: ubuntu-latest # a share runner
         steps:
             - name: clone repo
-              uses: action/checkout@v3
+              uses: actions/checkout@v3
             - name: Aws creds config 
-              uses: aws-actions/configure-aws-credentials@v$
+              uses: aws-actions/configure-aws-credentials@v4
               with:
                 role-to-assume: ${{env.AWS_ROLE}}  ## OIDC
                 aws-region: ${{env.AWS_REGION}}
