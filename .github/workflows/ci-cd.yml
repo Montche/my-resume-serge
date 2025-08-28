@@ -28,8 +28,8 @@ jobs:
                 role-to-assume: ${{env.AWS_ROLE}}  ## OIDC
                 aws-region: ${{env.AWS_REGION}}
             - name: login to ecr
-             uses: aws-actions/amazon-ecr-login@v1
-             id: ecr-login
+              uses: aws-actions/amazon-ecr-login@v1
+              id: ecr-login
             - name: Build tag and push image
               id: build-and-push
               run: |
